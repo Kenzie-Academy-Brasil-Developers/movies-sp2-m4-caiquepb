@@ -31,14 +31,33 @@ const listMovies = async (
   request: Request,
   response: Response
 ): Promise<Response> => {
-  const queryString: string = `
-    SELECT 
-      * 
-    FROM
-      movies;
-    `;
+  const category: any = request.query.category;
+  let queryString: string = ``;
+  let queryResult: QueryResult;
 
-  const queryResult: QueryResult<TMovies> = await client.query(queryString);
+  if (category) {
+    queryString = `
+      SELECT 
+        * 
+      FROM
+        movies
+      WHERE
+        category = $1;
+      `;
+    const queryConfig: QueryConfig = {
+      text: queryString,
+      values: [category],
+    };
+    queryResult = await client.query(queryConfig);
+  } else {
+    queryString = `
+      SELECT 
+        * 
+      FROM
+        movies
+      `;
+    queryResult = await client.query(queryString);
+  }
 
   return response.status(200).json(queryResult.rows);
 };
