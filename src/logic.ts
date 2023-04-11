@@ -49,17 +49,26 @@ const listMovies = async (
       values: [category],
     };
     queryResult = await client.query(queryConfig);
+    if (queryResult.rows.length === 0) {
+      queryString = `
+      SELECT 
+        * 
+      FROM
+        movies;
+      `;
+      queryResult = await client.query(queryString);
+    }
   } else {
     queryString = `
       SELECT 
         * 
       FROM
-        movies
+        movies;
       `;
     queryResult = await client.query(queryString);
   }
 
-  return response.status(200).json(queryResult.rows);
+  return response.json(queryResult.rows);
 };
 
 const getMovieById = async (
@@ -83,7 +92,7 @@ const getMovieById = async (
 
   const queryResult: QueryResult<TMovies> = await client.query(queryConfig);
 
-  return response.status(200).json(queryResult.rows[0]);
+  return response.json(queryResult.rows[0]);
 };
 
 const updateMovie = async (

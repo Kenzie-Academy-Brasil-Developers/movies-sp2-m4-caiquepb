@@ -7,16 +7,16 @@ import {
   listMovies,
   updateMovie,
 } from "./logic";
-import { checkName } from "./middlewares";
+import { checkId, checkName } from "./middlewares";
 
 const app: Application = express();
 app.use(json());
 
-app.post("/movies", createMovies);
+app.post("/movies", checkName, createMovies);
 app.get("/movies", listMovies);
-app.get("/movies/:id", checkName, getMovieById);
-app.patch("/movies/:id", checkName, updateMovie);
-app.delete("/movies/:id", checkName, deleteMovie);
+app.get("/movies/:id", checkId, getMovieById);
+app.patch("/movies/:id", checkId, checkName, updateMovie);
+app.delete("/movies/:id", checkId, deleteMovie);
 
 app.listen(3000, async () => {
   await startDatabase();

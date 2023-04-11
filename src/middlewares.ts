@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { QueryConfig, QueryResult } from "pg";
-import { TMovies } from "./interfaces";
+import { TMovies, TMoviesRequest } from "./interfaces";
 import { client } from "./database";
 
-const checkName = async (
+const checkId = async (
   request: Request,
   response: Response,
   next: NextFunction
@@ -27,11 +27,42 @@ const checkName = async (
 
   if (queryResult.rowCount === 0) {
     return response.status(404).json({
-      messsage: "Movie not found",
+      error: "Movie not found!",
     });
   }
 
   return next();
 };
 
-export { checkName };
+const checkName = async (
+  request: Request,
+  response: Response,
+  next: NextFunction
+): Promise<Response | void> => {
+  const name: string = request.body.name;
+  const queryString: string = `
+      SELECT 
+        * 
+      FROM
+        movies
+      WHERE
+        name = $1;
+      `;
+
+  const queryConfig: QueryConfig = {
+    text: queryString,
+    values: [name],
+  };
+
+  const queryResult: QueryResult<TMovies> = await client.query(queryConfig);
+
+  if (queryResult.rowCount !== 0 ) {
+    return response.status(409).json({
+      error: "Movie name already exists!",
+    });
+  }
+
+  return next();
+};
+
+export { checkId, checkName };
